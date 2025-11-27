@@ -1,5 +1,4 @@
-export * from './classes';
+export * from './types';
 
-export * from './color-picker';
-
-export * from './color-preview';
+export { default as ColorPreview } from './color-preview';
+export { default as ColorPicker } from './color-picker';

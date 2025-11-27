@@ -1,48 +1,69 @@
-import { lazy, Suspense } from 'react';
-import { useIsClient } from 'minimal-shared/hooks';
-import { mergeClasses } from 'minimal-shared/utils';
-
-import { styled } from '@mui/material/styles';
-
-import { chartClasses } from './classes';
-import { ChartLoading } from './components';
-
-import type { ChartProps } from './types';
+import { memo } from 'react';
+import dynamic from 'next/dynamic';
+// @mui
+import { alpha, styled } from '@mui/material/styles';
+// theme
+import { bgBlur } from 'src/theme/css';
 
 // ----------------------------------------------------------------------
 
-const LazyChart = lazy(() =>
-  import('react-apexcharts').then((module) => ({ default: module.default }))
-);
+const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export function Chart({ type, series, options, slotProps, className, sx, ...other }: ChartProps) {
-  const isClient = useIsClient();
+const Chart = styled(ApexChart)(({ theme }) => ({
+  '& .apexcharts-canvas': {
+    // Tooltip
+    '& .apexcharts-tooltip': {
+      ...bgBlur({
+        color: theme.palette.background.default,
+      }),
+      color: theme.palette.text.primary,
+      boxShadow: theme.customShadows.dropdown,
+      borderRadius: theme.shape.borderRadius * 1.25,
+      '&.apexcharts-theme-light': {
+        borderColor: 'transparent',
+        ...bgBlur({
+          color: theme.palette.background.default,
+        }),
+      },
+    },
+    '& .apexcharts-xaxistooltip': {
+      ...bgBlur({
+        color: theme.palette.background.default,
+      }),
+      borderColor: 'transparent',
+      color: theme.palette.text.primary,
+      boxShadow: theme.customShadows.dropdown,
+      borderRadius: theme.shape.borderRadius * 1.25,
+      '&:before': {
+        borderBottomColor: alpha(theme.palette.grey[500], 0.24),
+      },
+      '&:after': {
+        borderBottomColor: alpha(theme.palette.background.default, 0.8),
+      },
+    },
+    '& .apexcharts-tooltip-title': {
+      textAlign: 'center',
+      fontWeight: theme.typography.fontWeightBold,
+      backgroundColor: alpha(theme.palette.grey[500], 0.08),
+      color: theme.palette.text[theme.palette.mode === 'light' ? 'secondary' : 'primary'],
+    },
 
-  const renderFallback = () => <ChartLoading type={type} sx={slotProps?.loading} />;
-
-  return (
-    <ChartRoot
-      dir="ltr"
-      className={mergeClasses([chartClasses.root, className])}
-      sx={sx}
-      {...other}
-    >
-      {isClient ? (
-        <Suspense fallback={renderFallback()}>
-          <LazyChart type={type} series={series} options={options} width="100%" height="100%" />
-        </Suspense>
-      ) : (
-        renderFallback()
-      )}
-    </ChartRoot>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-const ChartRoot = styled('div')(({ theme }) => ({
-  width: '100%',
-  flexShrink: 0,
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius * 1.5,
+    // LEGEND
+    '& .apexcharts-legend': {
+      padding: 0,
+    },
+    '& .apexcharts-legend-series': {
+      display: 'inline-flex !important',
+      alignItems: 'center',
+    },
+    '& .apexcharts-legend-marker': {
+      marginRight: 8,
+    },
+    '& .apexcharts-legend-text': {
+      lineHeight: '18px',
+      textTransform: 'capitalize',
+    },
+  },
 }));
+
+export default memo(Chart);

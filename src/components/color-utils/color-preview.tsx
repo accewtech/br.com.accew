@@ -1,90 +1,37 @@
-import { varAlpha, mergeClasses } from 'minimal-shared/utils';
-
-import { styled } from '@mui/material/styles';
-
-import { colorPreviewClasses } from './classes';
+// @mui
+import { alpha } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+//
+import { ColorPreviewProps } from './types';
 
 // ----------------------------------------------------------------------
 
-export type ColorPreviewSlotProps = {
-  item?: React.ComponentProps<typeof ItemRoot>;
-  label?: React.ComponentProps<typeof ItemLabel>;
-};
+export default function ColorPreview({ colors, limit = 3, sx }: ColorPreviewProps) {
+  const renderColors = colors.slice(0, limit);
 
-export type ColorPreviewProps = React.ComponentProps<typeof ColorPreviewRoot> & {
-  limit?: number;
-  size?: number;
-  gap?: number;
-  colors: string[];
-  slotProps?: ColorPreviewSlotProps;
-};
-
-export function ColorPreview({
-  sx,
-  colors,
-  className,
-  slotProps,
-  gap = 6,
-  limit = 3,
-  size = 16,
-  ...other
-}: ColorPreviewProps) {
-  const colorsRange = colors.slice(0, limit);
-  const remainingColorCount = colors.length - limit;
+  const remainingColor = colors.length - limit;
 
   return (
-    <ColorPreviewRoot
-      className={mergeClasses([colorPreviewClasses.root, className])}
-      sx={sx}
-      {...other}
-    >
-      {colorsRange.map((color, index) => (
-        <ItemRoot
+    <Stack component="span" direction="row" alignItems="center" justifyContent="flex-end" sx={sx}>
+      {renderColors.map((color, index) => (
+        <Box
           key={color + index}
-          className={colorPreviewClasses.item}
-          {...slotProps?.item}
-          sx={[
-            {
-              '--item-color': color,
-              '--item-size': `${size}px`,
-              '--item-gap': `${-gap}px`,
-            },
-            ...(Array.isArray(slotProps?.item?.sx)
-              ? (slotProps.item?.sx ?? [])
-              : [slotProps?.item?.sx]),
-          ]}
+          sx={{
+            ml: -0.75,
+            width: 16,
+            height: 16,
+            bgcolor: color,
+            borderRadius: '50%',
+            border: (theme) => `solid 2px ${theme.palette.background.paper}`,
+            boxShadow: (theme) => `inset -1px 1px 2px ${alpha(theme.palette.common.black, 0.24)}`,
+          }}
         />
       ))}
 
       {colors.length > limit && (
-        <ItemLabel
-          className={colorPreviewClasses.label}
-          {...slotProps?.label}
-        >{`+${remainingColorCount}`}</ItemLabel>
+        <Box component="span" sx={{ typography: 'subtitle2' }}>{`+${remainingColor}`}</Box>
       )}
-    </ColorPreviewRoot>
+    </Stack>
   );
 }
-
-// ----------------------------------------------------------------------
-
-const ColorPreviewRoot = styled('ul')(() => ({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-}));
-
-const ItemRoot = styled('li')(({ theme }) => ({
-  borderRadius: '50%',
-  width: 'var(--item-size)',
-  height: 'var(--item-size)',
-  marginLeft: 'var(--item-gap)',
-  backgroundColor: 'var(--item-color)',
-  border: `solid 2px ${theme.vars.palette.background.paper}`,
-  boxShadow: `inset -1px 1px 2px ${varAlpha(theme.vars.palette.common.blackChannel, 0.24)}`,
-}));
-
-const ItemLabel = styled('li')(({ theme }) => ({
-  ...theme.typography.subtitle2,
-}));

@@ -1,5 +1,3 @@
-export * from './classes';
+export * from './types';
 
-export * from './iconify';
-
-export * from './register-icons';
+export { default } from './iconify';

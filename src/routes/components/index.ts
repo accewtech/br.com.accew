@@ -1,3 +1,1 @@
-export * from './router-link';
-
-export * from './error-boundary';
+export { default as RouterLink } from './router-link';

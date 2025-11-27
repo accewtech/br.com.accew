@@ -1,14 +1,10 @@
-import type { LinkProps } from 'react-router';
-
-import { Link } from 'react-router';
+import { forwardRef } from 'react';
+import Link, { LinkProps } from 'next/link';
 
 // ----------------------------------------------------------------------
 
-interface RouterLinkProps extends Omit<LinkProps, 'to'> {
-  href: string;
-  ref?: React.RefObject<HTMLAnchorElement | null>;
-}
+const RouterLink = forwardRef<HTMLAnchorElement, LinkProps>(({ ...other }, ref) => (
+  <Link ref={ref} {...other} />
+));
 
-export function RouterLink({ href, ref, ...other }: RouterLinkProps) {
-  return <Link ref={ref} to={href} {...other} />;
-}
+export default RouterLink;
